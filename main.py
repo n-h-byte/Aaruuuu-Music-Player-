@@ -64,7 +64,7 @@ API_ID = int(os.environ.get("API_ID"))
 API_HASH = os.environ.get("API_HASH")
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 ASSISTANT_SESSION = os.environ.get("ASSISTANT_SESSION")
-OWNER_ID = int(os.getenv("OWNER_ID", "5268762773"))
+OWNER_ID = int(os.getenv("OWNER_ID", "7999900761"))
 
 # ——— Monkey-patch resolve_peer ——————————————
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
@@ -399,11 +399,12 @@ async def start_handler(_, message):
     buttons = [
         [
             InlineKeyboardButton(f"➕ {add_me_text}", url=f"{BOT_LINK}?startgroup=true"),
-            InlineKeyboardButton(f"📢 {updates_text}", url="https://t.me/vibeshiftbots")
+            InlineKeyboardButton(f"📢 {updates_text}", url="https://t.me/bollywoodmusicsupport1")
         ],
         [
-            InlineKeyboardButton(f"💬 {support_text}", url="https://t.me/Frozensupport1"),
-            InlineKeyboardButton(f"❓ {help_text}", callback_data="show_help")
+            InlineKeyboardButton(f"💬 {support_text}", url="https://t.me/bollywoodmusicsupport"),
+            InlineKeyboardButton(f"❓ {help_text}", callback_data="show_help"),
+            InlineKeyboardButton(f"👑 {owner_text}", url="https://t.me/Adityaofficial3")
         ]
     ]
     reply_markup = InlineKeyboardMarkup(buttons)
@@ -1503,49 +1504,41 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-
 if __name__ == "__main__":
     logger.info("Loading persisted state from MongoDB...")
     load_state_from_db()
     logger.info("State loaded successfully.")
 
-    # start PyTgCalls
+    logger.info("Starting Frozen Music Bot services...")
+
     logger.info("→ Starting PyTgCalls client...")
     call_py.start()
     logger.info("PyTgCalls client started.")
 
-    # manually start the Pyrogram bot so we can fetch get_me()
-    logger.info("→ Starting Telegram bot client (bot.start)...")
+    logger.info("→ Starting Telegram bot (bot.run)...")
     try:
-        bot.start()
+        bot.run()
+        logger.info("Telegram bot has started.")
     except Exception as e:
-        logger.error(f"❌ Failed to start Pyrogram client: {e}")
+        logger.error(f"Error starting Telegram bot: {e}")
         sys.exit(1)
 
-    # fetch the bot’s own info
-    me = bot.get_me()
-    BOT_NAME = me.first_name  or "Frozen Music"
-    BOT_USERNAME = me.username or "vcmusiclubot"
-    BOT_LINK = f"https://t.me/{BOT_USERNAME}"
+    # Fetch bot name and link and set default values from environment
+    BOT_NAME = os.environ.get("BOT_NAME", "Frozen Music")
+    BOT_LINK = os.environ.get("BOT_LINK", "https://t.me/vcmusiclubot")
+    logger.info(f"Bot name set to: {BOT_NAME}")
+    logger.info(f"Bot link set to: {BOT_LINK}")
 
-    logger.info(f"✅ Bot Name: {BOT_NAME!r}")
-    logger.info(f"✅ Bot Username: @{BOT_USERNAME}")
-    logger.info(f"✅ Bot Link: {BOT_LINK}")
-
-    # now enter polling/idle
-    logger.info("→ Entering idle() (long-polling)")
-    idle()
-    bot.stop()
-    logger.info("Bot stopped.")
-
-    # assistant if needed
+    # If assistant is used for voice or other tasks
     if not assistant.is_connected:
         logger.info("Assistant not connected; starting assistant client...")
         assistant.run()
         logger.info("Assistant client connected.")
 
-    logger.info("✅ All services are up and running. Bot started successfully.")
+    logger.info("All services are up and running. Bot started successfully.")
+    
 
+    idle()
 
 
 
