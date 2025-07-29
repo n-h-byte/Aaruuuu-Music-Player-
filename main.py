@@ -1,4 +1,5 @@
-import os
+
+imfrom force_join import enforce_channel_joinport os
 import re
 import sys
 import time
@@ -566,6 +567,8 @@ async def help_util_callback(_, callback_query):
 
 @bot.on_message(filters.group & filters.regex(r'^/play(?:@\w+)?(?:\s+(?P<query>.+))?$'))
 async def play_handler(_, message: Message):
+        if not await enforce_channel_join(bot, message):
+        return
     chat_id = message.chat.id
 
     # If replying to an audio/video message, handle local playback
