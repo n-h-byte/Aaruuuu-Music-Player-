@@ -3,7 +3,7 @@ from pyrogram.types import Message
 
 # Set your channel's numeric ID and public join link here
 CHANNEL_ID = -1001789156562  # Replace with your channel's ID
-CHANNEL_JOIN_LINK = "https://t.me/YourChannelUsername"  # Replace with your channel's public link
+CHANNEL_JOIN_LINK = "https://t.me/Flipkart_online_shopping_Deals0"  # Replace with your channel's public link
 
 async def is_user_in_channel(bot, user_id):
     """
