@@ -99,9 +99,18 @@ assistant = Client("assistant_account", session_string=ASSISTANT_SESSION)
 call_py = PyTgCalls(assistant)
 
 
-ASSISTANT_USERNAME = "@xyz92929"
-ASSISTANT_CHAT_ID = 7634862283
-API_ASSISTANT_USERNAME = "@xyz92929"
+ASSISTANT_USERNAME = os.getenv("ASSISTANT_USERNAME")
+ASSISTANT_CHAT_ID = os.getenv("ASSISTANT_CHAT_ID")
+API_ASSISTANT_USERNAME = os.getenv("API_ASSISTANT_USERNAME")
+
+if not ASSISTANT_USERNAME or not ASSISTANT_CHAT_ID or not API_ASSISTANT_USERNAME:
+    print("Assistant username and chat ID not set")
+else:
+    # Convert chat ID to integer if needed
+    try:
+        ASSISTANT_CHAT_ID = int(ASSISTANT_CHAT_ID)
+    except ValueError:
+        print("Invalid ASSISTANT_CHAT_ID: not an integer")
 
 # API Endpoints
 API_URL = os.environ.get("API_URL")
@@ -127,7 +136,7 @@ COOLDOWN = 10
 chat_last_command = {}
 chat_pending_commands = {}
 QUEUE_LIMIT = 20
-MAX_DURATION_SECONDS = 7800  
+MAX_DURATION_SECONDS = 900  
 LOCAL_VC_LIMIT = 10
 playback_mode = {}
 
@@ -317,20 +326,36 @@ async def fetch_youtube_link_backup(query):
                 )
     except Exception as e:
         raise Exception(f"Backup Search API error: {e}")
-
-
     
+BOT_NAME = os.environ.get("BOT_NAME", "Frozen Music")
+BOT_LINK = os.environ.get("BOT_LINK", "https://t.me/vcmusiclubot")
+
+from pyrogram.errors import UserAlreadyParticipant, RPCError
+
 async def invite_assistant(chat_id, invite_link, processing_message):
     """
     Internally invite the assistant to the chat by using the assistant client to join the chat.
-    If an error occurs, it returns False and displays the exact error.
+    If the assistant is already in the chat, treat as success.
+    On other errors, display and return False.
     """
     try:
-        # Use the assistant client to join the chat via the invite link.
+        # Attempt to join via invite link
         await assistant.join_chat(invite_link)
         return True
+
+    except UserAlreadyParticipant:
+        # Assistant is already in the chat, no further action needed
+        return True
+
+    except RPCError as e:
+        # Handle other Pyrogram RPC errors
+        error_message = f"❌ Error while inviting assistant: Telegram says: {e.code} {e.error_message}"
+        await processing_message.edit(error_message)
+        return False
+
     except Exception as e:
-        error_message = f"❌ Error while inviting assistant: {str(e)}"
+        # Catch-all for any unexpected exceptions
+        error_message = f"❌ Unexpected error while inviting assistant: {str(e)}"
         await processing_message.edit(error_message)
         return False
 
@@ -349,22 +374,19 @@ def to_bold_unicode(text: str) -> str:
 
 @bot.on_message(filters.command("start"))
 async def start_handler(_, message):
-    # Extract and style the user's first name dynamically
     user_id = message.from_user.id
     raw_name = message.from_user.first_name or ""
     styled_name = to_bold_unicode(raw_name)
     user_link = f"[{styled_name}](tg://user?id={user_id})"
 
-    # Style button texts
     add_me_text = to_bold_unicode("Add Me")
     updates_text = to_bold_unicode("Updates")
     support_text = to_bold_unicode("Support")
     help_text = to_bold_unicode("Help")
 
-    # Caption with bold Unicode font for headings and feature labels
     caption = (
         f"👋 нєу {user_link} 💠, 🥀\n\n"
-        ">🎶 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 𝗙𝗥𝗢𝗭𝗘𝗡 𝗠𝗨𝗦𝗜𝗖! 🎵\n"
+        f">🎶 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 {BOT_NAME.upper()}! 🎵\n"
         ">🚀 𝗧𝗢𝗣-𝗡𝗢𝗧𝗖𝗛 24×7 𝗨𝗣𝗧𝗜𝗠𝗘 & 𝗦𝗨𝗣𝗣𝗢𝗥𝗧\n"
         ">🔊 𝗖𝗥𝗬𝗦𝗧𝗔𝗟-𝗖𝗟𝗘𝗔𝗥 𝗔𝗨𝗗𝗜𝗢\n"
         ">🎧 𝗦𝗨𝗣𝗣𝗢𝗥𝗧𝗘𝗗 𝗣𝗟𝗔𝗧𝗙𝗢𝗥𝗠𝗦: YouTube | Spotify | Resso | Apple Music | SoundCloud\n"
@@ -376,7 +398,7 @@ async def start_handler(_, message):
 
     buttons = [
         [
-            InlineKeyboardButton(f"➕ {add_me_text}", url="https://t.me/vcmusiclubot?startgroup=true"),
+            InlineKeyboardButton(f"➕ {add_me_text}", url=f"{BOT_LINK}?startgroup=true"),
             InlineKeyboardButton(f"📢 {updates_text}", url="https://t.me/vibeshiftbots")
         ],
         [
@@ -404,6 +426,7 @@ async def start_handler(_, message):
             broadcast_collection.insert_one({"chat_id": chat_id, "type": "group"})
 
 
+
 @bot.on_callback_query(filters.regex("^go_back$"))
 async def go_back_callback(_, callback_query):
     user_id = callback_query.from_user.id
@@ -411,7 +434,6 @@ async def go_back_callback(_, callback_query):
     styled_name = to_bold_unicode(raw_name)
     user_link = f"[{styled_name}](tg://user?id={user_id})"
 
-    # Style button texts
     add_me_text = to_bold_unicode("Add Me")
     updates_text = to_bold_unicode("Updates")
     support_text = to_bold_unicode("Support")
@@ -419,7 +441,7 @@ async def go_back_callback(_, callback_query):
 
     caption = (
         f"👋 нєу {user_link} 💠, 🥀\n\n"
-        ">🎶 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 𝗙𝗥𝗢𝗭𝗘𝗡 𝗠𝗨𝗦𝗜𝗖! 🎵\n"
+        f">🎶 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 {BOT_NAME.upper()}! 🎵\n"
         ">🚀 𝗧𝗢𝗣-𝗡𝗢𝗧𝗖𝗛 24×7 𝗨𝗣𝗧𝗜𝗠𝗘 & 𝗦𝗨𝗣𝗣𝗢𝗥𝗧\n"
         ">🔊 𝗖𝗥𝗬𝗦𝗧𝗔𝗟-𝗖𝗟𝗘𝗔𝗥 𝗔𝗨𝗗𝗜𝗢\n"
         ">🎧 𝗦𝗨𝗣𝗣𝗢𝗥𝗧𝗘𝗗 𝗣𝗟𝗔𝗧𝗙𝗢𝗥𝗠𝗦: YouTube | Spotify | Resso | Apple Music | SoundCloud\n"
@@ -431,7 +453,7 @@ async def go_back_callback(_, callback_query):
 
     buttons = [
         [
-            InlineKeyboardButton(f"➕ {add_me_text}", url="https://t.me/vcmusiclubot?startgroup=true"),
+            InlineKeyboardButton(f"➕ {add_me_text}", url=f"{BOT_LINK}?startgroup=true"),
             InlineKeyboardButton(f"📢 {updates_text}", url="https://t.me/vibeshiftbots")
         ],
         [
@@ -441,12 +463,12 @@ async def go_back_callback(_, callback_query):
     ]
     reply_markup = InlineKeyboardMarkup(buttons)
 
-    # Use edit_caption to keep Markdown link for mention
     await callback_query.message.edit_caption(
         caption=caption,
         parse_mode=ParseMode.MARKDOWN,
         reply_markup=reply_markup
     )
+
 
 
 @bot.on_callback_query(filters.regex("^show_help$"))
@@ -626,6 +648,22 @@ async def process_play_command(message: Message, query: str):
     chat_id = message.chat.id
     processing_message = await message.reply("❄️")
 
+    # --- ensure assistant is in the chat before we queue/play anything ----
+    status = await is_assistant_in_chat(chat_id)
+    if status == "banned":
+        await processing_message.edit("❌ Assistant is banned from this chat.")
+        return
+    if status is False:
+        # try to fetch an invite link to add the assistant
+        invite_link = await extract_invite_link(bot, chat_id)
+        if not invite_link:
+            await processing_message.edit("❌ Could not obtain an invite link to add the assistant.")
+            return
+        invited = await invite_assistant(chat_id, invite_link, processing_message)
+        if not invited:
+            # invite_assistant handles error editing
+            return
+
     # Convert short URLs to full YouTube URLs
     if "youtu.be" in query:
         m = re.search(r"youtu\.be/([^?&]+)", query)
@@ -696,7 +734,7 @@ async def process_play_command(message: Message, query: str):
         secs = isodate.parse_duration(duration_iso).total_seconds()
         if secs > MAX_DURATION_SECONDS:
             await processing_message.edit(
-                "❌ Streams longer than 10 min are not allowed. We are facing some server issues—please try later."
+                "❌ Streams longer than 15 min are not allowed. If u are the owner of this bot contact @xyz09723 to upgrade your plan"
             )
             return
 
@@ -728,7 +766,6 @@ async def process_play_command(message: Message, query: str):
                 reply_markup=queue_buttons
             )
             await processing_message.delete()
-
 
 
 # ─── Utility functions ──────────────────────────────────────────────────────────────
@@ -1374,8 +1411,8 @@ async def broadcast_handler(_, message):
 
 
 
-@bot.on_message(filters.command("frozen_check") & filters.chat(ASSISTANT_CHAT_ID))
-async def frozen_check_command(_, message):
+@bot.on_message(filters.command("frozen_check"))
+async def frozen_check_command(client: Client, message):
     await message.reply_text("frozen check successful ✨")
 
 
@@ -1458,38 +1495,92 @@ def run_http_server():
 threading.Thread(target=run_http_server, daemon=True).start()
 
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)-8s | %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
 logger = logging.getLogger(__name__)
 
+frozen_check_event = asyncio.Event()
+
+async def restart_bot():
+    port = int(os.environ.get("PORT", 8080))
+    url = f"http://localhost:{port}/restart"
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                if resp.status == 200:
+                    logger.info("Local restart endpoint triggered successfully.")
+                else:
+                    logger.error(f"Local restart endpoint failed: {resp.status}")
+    except Exception as e:
+        logger.error(f"Error calling local restart endpoint: {e}")
+
+async def frozen_check_loop(bot_username: str):
+    while True:
+        try:
+            # 1) send the check command
+            await assistant.send_message(f"{bot_username}", "/frozen_check")
+            logger.info(f"Sent /frozen_check to @{bot_username}")
+
+            # 2) poll for a reply for up to 30 seconds
+            deadline = time.time() + 30
+            got_ok = False
+
+            while time.time() < deadline:
+                msgs = await assistant.get_history(f"{bot_username}", limit=1)
+                if msgs:
+                    text = msgs[0].text or ""
+                    if "frozen check successful ✨" in text.lower():
+                        got_ok = True
+                        logger.info("Received frozen check confirmation.")
+                        break
+                await asyncio.sleep(3)
+
+            # 3) if no confirmation, restart
+            if not got_ok:
+                logger.warning("No frozen check reply—restarting bot.")
+                await restart_bot()
+
+        except Exception as e:
+            logger.error(f"Error in frozen_check_loop: {e}")
+
+        await asyncio.sleep(60)
+
+# ——— Main startup ———
 
 if __name__ == "__main__":
     logger.info("Loading persisted state from MongoDB...")
     load_state_from_db()
     logger.info("State loaded successfully.")
 
-    logger.info("Starting Frozen Music Bot services...")
-
     logger.info("→ Starting PyTgCalls client...")
     call_py.start()
     logger.info("PyTgCalls client started.")
 
-    logger.info("→ Starting Telegram bot (bot.run)...")
+    logger.info("→ Starting Telegram bot client (bot.start)...")
     try:
-        bot.run()
-        logger.info("Telegram bot has started.")
+        bot.start()
     except Exception as e:
-        logger.error(f"Error starting Telegram bot: {e}")
+        logger.error(f"❌ Failed to start Pyrogram client: {e}")
         sys.exit(1)
 
-    # If assistant is used for voice or other tasks
+    me = bot.get_me()
+    BOT_NAME = me.first_name or "Frozen Music"
+    BOT_USERNAME = me.username or os.getenv("BOT_USERNAME", "vcmusiclubot")
+    BOT_LINK = f"https://t.me/{BOT_USERNAME}"
+
+    logger.info(f"✅ Bot Name: {BOT_NAME!r}")
+    logger.info(f"✅ Bot Username: {BOT_USERNAME}")
+    logger.info(f"✅ Bot Link: {BOT_LINK}")
+
+    # start the frozen‑check loop (no handler registration needed)
+    asyncio.get_event_loop().create_task(frozen_check_loop(BOT_USERNAME))
+
     if not assistant.is_connected:
         logger.info("Assistant not connected; starting assistant client...")
         assistant.run()
         logger.info("Assistant client connected.")
 
-    logger.info("All services are up and running. Bot started successfully.")
+    logger.info("→ Entering idle() (long-polling)")
     idle()
+
+    bot.stop()
+    logger.info("Bot stopped.")
+    logger.info("✅ All services are up and running. Bot started successfully.")
