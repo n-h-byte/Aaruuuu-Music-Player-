@@ -403,7 +403,7 @@ async def start_handler(_, message):
             InlineKeyboardButton(f"📢 {updates_text}", url="https://t.me/vibeshiftbots")
         ],
         [
-            InlineKeyboardButton(f"💬 {support_text}", url="https://t.me/Frozensupport1"),
+            InlineKeyboardButton(f"💬 {support_text}", url="https://t.me/Bye_Artist"),
             InlineKeyboardButton(f"❓ {help_text}", callback_data="show_help")
         ]
     ]
