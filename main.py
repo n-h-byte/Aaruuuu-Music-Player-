@@ -108,7 +108,7 @@ API_ASSISTANT_USERNAME = os.getenv("API_ASSISTANT_USERNAME")
 
 
 # ─── MongoDB Setup ─────────────────────────────────────────
-mongo_uri = os.environ.get("MongoDB_url")
+mongo_uri = os.environ.get("mongodb+srv://rj5706603:O95nvJYxapyDHfkw@cluster0.fzmckei.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 mongo_client = MongoClient(mongo_uri)
 db = mongo_client["music_bot"]
 
