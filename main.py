@@ -102,8 +102,8 @@ assistant = Client("assistant_account", session_string=ASSISTANT_SESSION)
 call_py = PyTgCalls(assistant)
 
 
-ASSISTANT_USERNAME = None
-ASSISTANT_CHAT_ID = None
+ASSISTANT_USERNAME = @Kiki_music_assistant
+ASSISTANT_CHAT_ID = 8275352871
 API_ASSISTANT_USERNAME = os.getenv("API_ASSISTANT_USERNAME")
 
 
