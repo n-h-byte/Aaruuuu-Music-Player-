@@ -61,11 +61,13 @@ from FrozenMusic.telegram_client.startup_hooks import precheck_channels
 load_dotenv()
 
 
-API_ID = int(os.environ.get("API_ID"))
-API_HASH = os.environ.get("API_HASH")
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-ASSISTANT_SESSION = os.environ.get("ASSISTANT_SESSION")
-OWNER_ID = int(os.getenv("OWNER_ID", "5268762773"))
+API_ID = int(os.environ.get("25714132
+"))
+API_HASH = os.environ.get("2d064dece23bc6b340604bf30c022312
+")
+BOT_TOKEN = os.environ.get("8310994736:AAFuUDL_zSqHYupNzAK8-4nN_Hy9D6DR7OM")
+ASSISTANT_SESSION = os.environ.get("BQGIXdQAX6EjJARccfy7GQZ0s6n2z6UFMfNComZMr8k34X27e8U6ClUyJUYx3e4Dg7gnFJE0qcVp77WUZsCqRYRWLZ97GOO05w6Usj5qtJnT1H4U6B1XQHsut28OvepP_AG90tdHAU0Z1ug2iNqbyZMDGIZERRjg4BkFAEacajXgh8od0EEfCwpkcdkEbG4cHcMbETQnCOPFBIe1eGuZhecuaxNzuNCpG8MwYskRqZBUZ_G4YVYEMxmwDvLZln1Lm9_J9KhzjG_zdJY3brFliVpaZBBz7X341IFH1uZhIQ28-J1JOEFnOtKWmvNOsRgd6f9UICe03Z23IfWGMGdhIU9tvzaaBQAAAAHeKbDRAQ")
+OWNER_ID = int(os.getenv("OWNER_ID", "8059202034"))
 
 # ——— Monkey-patch resolve_peer ——————————————
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
