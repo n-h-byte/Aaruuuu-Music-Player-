@@ -920,10 +920,9 @@ async def fallback_local_playback(chat_id: int, message: Message, song_info: dic
         total_duration = parse_duration_str(song_info.get("duration", "0:00"))
         one_line = _one_line_title(song_info["title"])
         base_caption = (
-            "<blockquote>"
-            "<b>🎧 Frozen ✘ Music Streaming</b> (Local Playback)\n\n"
-            f"❍ <b>Title:</b> {one_line}\n"
-            f"❍ <b>Requested by:</b> {song_info['requester']}"
+            "<b>🎧  {BOT_NAME.upper()}</b> (Local Playback)\n\n"  
+            f"❍ <b>Title:</b> {one_line}\n"  
+            f"❍ <b>Requested by:</b> {song_info['requester']}"  
             "</blockquote>"
         )
         initial_progress = get_progress_bar_styled(0, total_duration)
